@@ -5,7 +5,10 @@ from base.models import (
     User,
     Customer,
     Order,
-    OrderItems
+    OrderItems,
+    CustomerAddress,
+    Review,
+    Category,
 )
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -43,7 +46,7 @@ class VendorSerializer(serializers.ModelSerializer):
     """serializer for the vendor objects"""
     class Meta:
         model = Vendor
-        fields = ['user', 'address']
+        fields = ['id','user', 'address']
 
     def __init__(self, *args, **kwargs):
         super(VendorSerializer, self).__init__(*args, **kwargs)
@@ -51,9 +54,10 @@ class VendorSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     """serializer for the product object"""
+    review_products = serializers.StringRelatedField(many=True, read_only=True)
     class Meta:
         model = Product
-        fields = ['category', 'vendor', 'title', 'detail', 'price']
+        fields = ['id','category', 'vendor', 'title', 'detail', 'price', 'review_products']
 
     def __init__(self, *args, **kwargs):
         super(ProductSerializer, self).__init__(*args, **kwargs)
@@ -89,3 +93,31 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         super(OrderDetailSerializer, self).__init__(*args, **kwargs)
         self.Meta.depth=1
     
+class CustomerAddressSerializer(serializers.ModelSerializer):
+    """serilizer for the customer address objects"""
+    class Meta:
+        model = CustomerAddress
+        fields = ['id','customer', 'address']
+    
+    def __init__(self, *args, **kwargs):
+        super(CustomerAddressSerializer, self).__init__(*args, **kwargs)
+        self.Meta.depth=1
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id','customer', 'product', 'rating', 'review', 'created_at']
+    
+    def __init__(self, *args, **kwargs):
+        super(ReviewSerializer, self).__init__(*args, **kwargs)
+        self.Meta.depth=1
+
+class CategorySerializer(serializers.ModelSerializer):
+    """serializer for the category objects"""
+    class Meta:
+        model = Category
+        fields = ['id','title', 'description']
+    
+    def __init__(self, *args, **kwargs):
+        super(CategorySerializer, self).__init__(*args, **kwargs)
+        self.Meta.depth=1

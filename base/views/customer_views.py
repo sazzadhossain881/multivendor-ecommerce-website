@@ -3,9 +3,11 @@
 from rest_framework.views import APIView
 from base.serializers import (
     CustomerSerializer,
+    CustomerAddressSerializer
 )
 from base.models import (
-    Customer
+    Customer,
+    CustomerAddress,
 )
 from rest_framework.response import Response
 from rest_framework import status
@@ -51,3 +53,50 @@ class CustomerRetrieveUpdateDeleteApiView(APIView):
         customer = Customer.objects.get(pk=pk)
         customer.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CustomerAddressCreateListApiView(APIView):
+
+    def get(self, request):
+        address = CustomerAddress.objects.all()
+        serializer = CustomerAddressSerializer(address, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = CustomerAddressSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+
+class CustomerAddressRetrieveUpdateDeleteApiView(APIView):
+
+    def get(self, request, pk):
+
+        try:
+            address = CustomerAddress.objects.get(pk=pk)
+        
+        except CustomerAddress.DoesNotExist:
+            return Response({'error':'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = CustomerAddressSerializer(address, many=True)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+
+        address = CustomerAddress.objects.get(pk=pk)
+        serializer = CustomerAddressSerializer(address, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+
+        address = CustomerAddress.objects.get(pk=pk)
+        address.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
