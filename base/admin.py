@@ -75,3 +75,15 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Product, ProductAdmin)
+
+
+# class OrderItemAdmin(admin.ModelAdmin):
+#     list_display = "__all__"
+
+
+# admin.site.register(models.OrderItems, OrderItemAdmin)
+class WishListAdmin(admin.ModelAdmin):
+    list_display = ["id", "product", "customer"]
+
+
+admin.site.register(models.WishList, WishListAdmin)

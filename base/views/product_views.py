@@ -2,15 +2,20 @@
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from base.models import (
-    Product,
-    Review,
-    Category,
+from base.models import Product, Review, Category, WishList, Customer
+
+from base.serializers import (
+    ProductSerializer,
+    ReviewSerializer,
+    CategorySerializer,
+    WishListSerializer,
 )
-from base.serializers import ProductSerializer, ReviewSerializer, CategorySerializer
 from rest_framework import pagination
 from rest_framework import status
 from rest_framework import generics
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 
 
 class ProductListView(APIView):
@@ -148,4 +153,57 @@ class RelatedProductView(generics.ListAPIView):
         product_id = self.kwargs["pk"]
         product = Product.objects.get(id=product_id)
         qs = qs.filter(category=product.category).exclude(id=product_id)
+        return qs
+
+
+class WishListListCreateView(generics.ListCreateAPIView):
+    """wishList list create api view"""
+
+    serializer_class = WishListSerializer
+    queryset = WishList.objects.all()
+
+
+@csrf_exempt
+def check_in_wish_list(request):
+    if request.method == "POST":
+        product_id = request.POST.get("product")
+        customer_id = request.POST.get("customer")
+
+        # product = Product.objects.get(id = product_id)
+        # customer = Customer.objects.get(id = customer_id)
+        checkWishList = WishList.objects.filter(
+            product__id=product_id, customer__id=customer_id
+        ).count()
+
+        msg = {"bool": False}
+        if checkWishList > 0:
+            msg = {"bool": True}
+
+    return JsonResponse(msg)
+
+
+@csrf_exempt
+def remove_from_wishlist(request):
+    if request.method == "POST":
+        wishlist_id = reqquest.POST.get("wishlist_id")
+        res = WishList.objects.filter(id=wishlist_id).delete()
+
+        msg = {"bool": False}
+
+        if res:
+            msg = {"bool": True}
+
+    return JsonResponse(msg)
+
+
+class CustomerWishItemListView(generics.ListAPIView):
+    """customer wish item list view"""
+
+    serializer_class = WishListSerializer
+    queryset = WishList.objects.all()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        customer_id = self.kwargs["pk"]
+        qs = qs.filter(customer__id=customer_id)
         return qs

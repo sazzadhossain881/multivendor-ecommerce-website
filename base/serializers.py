@@ -10,6 +10,7 @@ from base.models import (
     Review,
     Category,
     ProductImage,
+    WishList,
 )
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -118,13 +119,21 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderDetailSerializer(serializers.ModelSerializer):
     """serializer for the order items objects"""
 
+    # order = OrderSerializer()
+    # product = ProductSerializer()
     class Meta:
         model = OrderItems
-        fields = ["id", "order", "product"]
+        fields = ["id", "order", "product", "quantity", "price"]
 
-    def __init__(self, *args, **kwargs):
-        super(OrderDetailSerializer, self).__init__(*args, **kwargs)
-        self.Meta.depth = 1
+    # def __init__(self, *args, **kwargs):
+    #     super(OrderDetailSerializer, self).__init__(*args, **kwargs)
+    #     self.Meta.depth = 1
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["order"] = OrderSerializer(instance.order).data
+        reaponse["product"] = ProductSerializer(instance.product).data
+        return response
 
 
 class CustomerAddressSerializer(serializers.ModelSerializer):
@@ -159,3 +168,20 @@ class CategorySerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super(CategorySerializer, self).__init__(*args, **kwargs)
         self.Meta.depth = 1
+
+
+class WishListSerializer(serializers.ModelSerializer):
+    """serializer for the wishList objects"""
+
+    class Meta:
+        model = WishList
+        fields = ["id", "product", "customer"]
+
+    def __init__(self, *args, **kwargs):
+        super(WishListSerializer, self).__init__(*args, **kwargs)
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["customer"] = CustomerSerializer(instance.customer).data
+        response["product"] = ProductSerializer(instance.product).data
+        return response

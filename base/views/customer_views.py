@@ -7,11 +7,12 @@ from base.models import (
     CustomerAddress,
     User,
 )
+from django.db import IntegrityError
 from rest_framework.response import Response
 from rest_framework import status
 
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 
@@ -119,17 +120,24 @@ def customer_login(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
+        # print(f'email:{email}, password:{password}')
         if email and password:
-            user = authenticate(request, email=email, password=password)
+            user = User.objects.filter(email=email).first()
+            if user and user.check_password(password):
+                login(request, user)
+                # print(user)
 
             if user is not None:
-                msg = {"bool": True, "user": user.email}
+                customer = Customer.objects.get(user=user)
+                msg = {"bool": True, "user": user.email, "id": customer.id}
             else:
                 msg = {"bool": False, "msg": "Invalid email/password!"}
         else:
             msg = {"bool": False, "msg": "Email and password are required."}
     else:
         msg = {"bool": False, "msg": "Invalid request method."}
+
+    print(msg)
 
     return JsonResponse(msg)
 

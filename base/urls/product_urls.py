@@ -27,4 +27,17 @@ urlpatterns = [
         views.RelatedProductView.as_view(),
         name="related-product",
     ),
+    path(
+        "wishList/list/",
+        views.WishListListCreateView.as_view(),
+        name="wish-list-list-create-view",
+    ),
+    # path("check-in-wishList/", views.   , name='check-in-wishList'),
+    path("check-in-wishList/", views.check_in_wish_list, name="check-in-wishList"),
+    path("remove-from-wishlist/", views.remove_from-wishlist, name='remove-from-wishlist'),
+    path(
+        "customer/<str:pk>/wishItems/",
+        views.CustomerWishItemListView.as_view(),
+        name="customer-wish-item-list-view",
+    ),
 ]
